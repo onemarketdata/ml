@@ -1,0 +1,136 @@
+general:
+    url: "http://172.16.1.89:5000"
+    experiment_name: 'volume_prediction'
+    log_models: True
+datafeeds:
+    -
+        class: dsframework.impl.CSVDatafeed
+        use: True
+        filepath_or_buffer: '../../demo/dsf_cases/csv_data/fut_nq.csv'
+        index_col: 'Time'
+        suffix: '_fut'
+    -
+        class: dsframework.impl.CSVDatafeed
+        use: False
+        filepath_or_buffer: '../../demo/dsf_cases/csv_data/etf_nq.csv'
+        index_col: 'Time'
+        suffix: '_etf'
+    -
+        class: dsframework.impl.CSVDatafeed
+        use: False
+        filepath_or_buffer: '../../demo/dsf_cases/csv_data/opt_nq.csv'
+        index_col: 'Time'
+        suffix: '_opt'       
+features:
+    -
+        class: dsframework.impl.AddLags
+        use: True
+        columns: ['VOLUME_fut']
+        periods: [1, 2, 3, 39, 40]
+        use_as_inputs: True
+splitters:
+    -
+        class: dsframework.impl.SplitXYTrainTest
+        use: True
+        columns_to_predict: ['VOLUME_fut']
+        shuffle: False
+        test_size: 0.1506
+        val_size: 0.15
+preprocessors:
+    -
+        class: dsframework.impl.LimitOutliers
+        use: True
+        std_num: 4
+        target_columns: ['VOLUME_fut']
+    -
+        class: dsframework.impl.IntradayAveraging
+        use: True
+        window_days: 20
+        bins: 39
+        datetime_column: 'Time'
+        target_columns: ['VOLUME_fut']
+    -
+        class: dsframework.impl.MinMaxScaler
+        use: True
+training:
+    use: 'XGBRegressor'
+    loss: 'RMSE'
+    overfitting:
+        eval_metric: 'MAE' #monitor in EarlyStopping
+        early_stopping_rounds: 30 # 0 == disable
+        use_best_model: True
+    search_cv:
+        val_type: 'WalkForward' # 'Simple','Cross','WalkForward'
+        folds: 5
+        eval_metric: 'MAE'
+        early_stopping: True
+        #Search params:
+        tuning_cv: True
+        search_optimization: 'grid' # 'grid', 'random', 'bayesian', 'bohb', 'hyperopt'
+        n_trials: 2 # is used for 'random', 'bayesian', 'bohb'
+    models:
+        XGBRegressor:
+            init_params:
+                learning_rate: [.01, .03, .1]
+                n_estimators: [100, 500, 1000]
+                max_depth: [2, 3, 4]
+                min_child_weight: [2, 4]
+                max_delta_step: [0]
+                subsample: [0.9]
+                nthread: [2]
+            fit_params:
+                verbose: 0
+        CatBoostRegressor:
+            init_params:
+                iterations: [500, 1000]
+                learning_rate: [0.09]
+                l2_leaf_reg: [3, 1, 2]
+                depth: [2, 1, 3]
+            fit_params:
+                verbose: 0
+        DNNRegressor:
+            init_params:
+                hid_layers_num: [2]
+                neurons_num_layer1: [4]
+                activation_layer1: ['elu']
+                dropout_layer1: [0]
+                neurons_num_layer2: [4]
+                activation_layer2: ['elu']
+                dropout_layer2: [0]
+                neurons_num_layer3: [4]
+                activation_layer3: ['elu']
+                dropout_layer3: [0]
+                optimizer: ['RMSprop']
+            fit_params:
+                epochs: 256
+                batch_size: 32
+                shuffle: False
+                verbose: 1
+        DecisionTreeRegressor:
+            init_params:
+                max_depth: [1, 2, 4, 5, 7, 10, 50]
+        RandomForestRegressor:
+            init_params:
+                n_estimators: [50, 100, 500, 1000]
+                max_depth: [2, 3, 4, 8, 16]
+        CascadeForestRegressor:
+            init_params:
+                n_bins: [10, 100, 255]
+                bin_subsample: [10000, 100000, 200000]
+                max_layers: [20]
+                n_estimators: [2, 5]
+
+
+            
+prediction:
+  preprocessing_reverse: True
+
+evaluators:
+  - class: dsframework.impl.R2Evaluator
+    use: True
+  - class: dsframework.impl.MAEEvaluator
+    use: True
+  - class: dsframework.impl.RMSEEvaluator
+    use: True
+  - class: dsframework.impl.MAPEEvaluator
+    use: True
