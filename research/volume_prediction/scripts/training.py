@@ -1,7 +1,9 @@
 from tensorflow.keras.layers import Dense, Dropout, Input
 from tensorflow.keras.models import Sequential
+from tensorflow import random
 
 def dnn(meta, compile_kwargs, **kwargs):
+    random.set_seed(kwargs.get('random_seed', 42))
     model = Sequential()
     model.add(Input(shape=(meta['n_features_in_'])))
     for layer in range(1, kwargs.get('hid_layers_num', 2) + 1):

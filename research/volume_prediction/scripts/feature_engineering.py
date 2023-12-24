@@ -19,7 +19,7 @@ def add_lags(df, columns, periods=[1, 2, 3, 4, 38, 39, 78, 195]):
 
 def evaluate_feature_importance(df, train_indexes, lags_columns, target, model=None, threshold=0.95, plot=False):
     if model is None:
-        warnings.warn("Model is not specified. Using CatBoostRegressor", UserWarning)
+        warnings.warn("Feature Importance: model is not specified, using CatBoostRegressor", UserWarning)
         model = CatBoostRegressor()
     model.fit(df.loc[train_indexes, lags_columns],
             df.loc[train_indexes, target],
