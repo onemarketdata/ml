@@ -5,7 +5,18 @@ from .prepare_data import (
     remove_seasonality_ia,
     restore_seasonality_ia,
 )
-from .features_calculation import add_lags
+from .feature_engineering import (
+    add_lags,
+    evaluate_feature_importance,
+)
+from .training import (
+    dnn,
+)
+
+from .evaluation import (
+    evaluate_baseline,
+    mean_absolute_percentage_error
+)
 
 __all__ = [
     "load_joined_data",
@@ -13,5 +24,9 @@ __all__ = [
     "cap_outliers",
     "remove_seasonality_ia",
     "restore_seasonality_ia",
-    "add_lags"
+    "add_lags",
+    "evaluate_feature_importance",
+    "dnn",
+    "evaluate_baseline",
+    "mean_absolute_percentage_error",
 ]

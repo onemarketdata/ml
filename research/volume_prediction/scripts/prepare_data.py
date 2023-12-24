@@ -29,7 +29,7 @@ def cap_outliers(ts, train_indexes, columns, std_num=4):
 
 def remove_seasonality_ia(ts, columns, base_col="VOLUME_fut", hhmm="hhmm", bins=39, window_days=20):
     # Determine INTRADAY_AVERAGE_VOLUMES, then calculate CURRENT_VOLUME - INTRADAY_AVERAGE_VOLUME
-
+    original_columns = list(ts.columns)
     ts_agg = ts.groupby(by=hhmm).rolling(window_days).mean()
     ts_agg = ts_agg.shift(1).reset_index(level=0).sort_index()
 
@@ -40,10 +40,19 @@ def remove_seasonality_ia(ts, columns, base_col="VOLUME_fut", hhmm="hhmm", bins=
     ts_unseason[columns] = ts[columns] - ts_agg[columns]
     ts_unseason[f"{base_col}_target"] = ts[f"{base_col}_target"] - ts_agg[base_col]
 
-    ts_int_avg = ts_unseason[columns + [f"{base_col}_target", f"{base_col}_agg"]]
+    ts_int_avg = ts_unseason[original_columns + [f"{base_col}_agg"]]
 
     return ts_int_avg
 
 
-def restore_seasonality_ia():
-    pass
+def restore_seasonality_ia(orig_df, y_pred, base_col="VOLUME_fut"):
+    tdf_test = y_pred.join(orig_df)[
+        [f"{base_col}_pred", f"{base_col}_target", f"{base_col}_agg"]
+    ]
+    tdf_test["VOLUME_prediction"] = (
+        tdf_test[f"{base_col}_pred"] + tdf_test[f"{base_col}_agg"]
+    )
+    tdf_test["VOLUME_original"] = (
+        tdf_test[f"{base_col}_target"] + tdf_test[f"{base_col}_agg"]
+    )
+    return tdf_test
