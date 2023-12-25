@@ -55,4 +55,4 @@ def restore_seasonality_ia(orig_df, y_pred, base_col="VOLUME_fut"):
     tdf_test["VOLUME_original"] = (
         tdf_test[f"{base_col}_target"] + tdf_test[f"{base_col}_agg"]
     )
-    return tdf_test
+    return tdf_test[["VOLUME_prediction", "VOLUME_original"]].dropna()
