@@ -45,14 +45,11 @@ def remove_seasonality_ia(ts, columns, base_col="VOLUME_fut", hhmm="hhmm", bins=
     return ts_int_avg
 
 
-def restore_seasonality_ia(orig_df, y_pred, base_col="VOLUME_fut"):
-    tdf_test = y_pred.join(orig_df)[
-        [f"{base_col}_pred", f"{base_col}_target", f"{base_col}_agg"]
-    ]
-    tdf_test["VOLUME_prediction"] = (
-        tdf_test[f"{base_col}_pred"] + tdf_test[f"{base_col}_agg"]
+def restore_seasonality_ia(df_test, base_col="VOLUME_fut"):
+    df_test[f"{base_col}_pred"] = (
+        df_test[f"{base_col}_pred"] + df_test[f"{base_col}_agg"]
     )
-    tdf_test["VOLUME_original"] = (
-        tdf_test[f"{base_col}_target"] + tdf_test[f"{base_col}_agg"]
+    df_test[f"{base_col}_target"] = (
+        df_test[f"{base_col}_target"] + df_test[f"{base_col}_agg"]
     )
-    return tdf_test[["VOLUME_prediction", "VOLUME_original"]].dropna()
+    return df_test[[f"{base_col}_pred", f"{base_col}_target"]].dropna()
