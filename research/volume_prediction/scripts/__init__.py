@@ -14,7 +14,6 @@ from .training import (
 )
 
 from .evaluation import (
-    evaluate_baseline,
     mean_absolute_percentage_error
 )
 
