@@ -11,6 +11,7 @@ from .feature_engineering import (
 )
 from .training import (
     dnn,
+    XGBSaveFoldsModels
 )
 
 from .evaluation import (
@@ -28,4 +29,5 @@ __all__ = [
     "dnn",
     "evaluate_baseline",
     "mean_absolute_percentage_error",
+    "XGBSaveFoldsModels",
 ]
