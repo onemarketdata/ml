@@ -2,3 +2,4 @@
 catboost_info/
 dnn_checkpoints/
 __pycache__/
+*.pyc
