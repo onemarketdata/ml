@@ -55,6 +55,7 @@ def _load_etf_data(
     return etf_ts
 
 
+# TODO: remove func below, it is the same as _load_etf_data() now
 def _load_futures_data(
     db="CME",
     tick_type="TRD",
